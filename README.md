@@ -1,0 +1,2 @@
+# flush
+my thinking tool
