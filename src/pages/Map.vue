@@ -10,6 +10,7 @@
 import Vue from 'vue'
 import Node from "../components/Node.vue"
 import * as UUID from 'uuid'
+import {Line} from "../models/model"
 
 const ctx = require('../main');
 
@@ -56,19 +57,6 @@ export default {
 
       this.updateLines()
     },
-    onUpdateNode(node) {
-      const docId = node.$el.getAttribute('id')
-      ctx.db.collection('maps')
-          .doc('y8pzFwJTTbHjGFVEqAmB')
-          .collection('entities')
-          .doc(docId).update({
-        text: node.nodeText,
-        pos: {
-          x: $(node.$el).css('left'),
-          y: $(node.$el).css('top')
-        }
-      })
-    },
     addLine(value) {
       console.log("addline")
       const svg = $('svg')
@@ -101,6 +89,25 @@ export default {
       a.setAttribute("x2", to_pos.left)
       a.setAttribute("y2", to_pos.top)
     },
+    removeLine(line) {
+      console.log('removeLine', line)
+      this.entities().doc(line.id).delete()
+    },
+    entities() {
+      return ctx.db.collection('maps')
+          .doc('y8pzFwJTTbHjGFVEqAmB')
+          .collection('entities');
+    },
+    onUpdateNode(node) {
+      const docId = node.$el.getAttribute('id')
+      this.entities().doc(docId).update({
+        text: node.nodeText,
+        pos: {
+          x: $(node.$el).css('left'),
+          y: $(node.$el).css('top')
+        }
+      })
+    },
     onDrop(src, target) {
       console.log(src, target)
 
@@ -110,9 +117,20 @@ export default {
         to: target.getAttribute('id')
       }
 
-      ctx.db.collection('maps')
-          .doc('y8pzFwJTTbHjGFVEqAmB')
-          .collection('entities').add(value)
+      const line = new Line(value)
+
+      const exLine = Object.entries(this.lineMap).find(ent => {
+        const [key, value] = ent;
+        const l = new Line(value)
+        return l.keyId() == line.keyId()
+      })
+      if (exLine) {
+        // もうある
+        this.removeLine(exLine[1]);
+        return;
+      }
+
+      this.entities().add(value)
 
       // this.addLine(value)
     }
@@ -123,9 +141,7 @@ export default {
   mounted: function () {
     $('#root').on('dblclick', e => {
       console.log('root-dblclk')
-      ctx.db.collection('maps')
-          .doc('y8pzFwJTTbHjGFVEqAmB')
-          .collection('entities').add(
+      this.entities().add(
           {
             type: 'node',
             pos: {
@@ -152,29 +168,29 @@ export default {
 
     // 対象の map の更新を listen する
     // mapId:y8pzFwJTTbHjGFVEqAmB 固定
-    ctx.db.collection('maps')
-        .doc('y8pzFwJTTbHjGFVEqAmB')
-        .collection('entities')
-        .onSnapshot((querySnapshot) => {
-          console.log('onSnapshot', querySnapshot)
-          querySnapshot.docChanges().forEach((change) => {
-            console.log(change)
-            if (change.type === "added") {
-              console.log("New city: ", change.doc.data());
-              if (change.doc.data().type == 'node') {
-                this.addNode({id: change.doc.id, ...change.doc.data()})
-              } else {
-                this.addLine({id: change.doc.id, ...change.doc.data()})
-              }
-            }
-            if (change.type === "modified") {
-              console.log("Modified city: ", change.doc.data());
-            }
-            if (change.type === "removed") {
-              console.log("Removed city: ", change.doc.data());
-            }
-          });
-        });
+    this.entities().onSnapshot((querySnapshot) => {
+      console.log('onSnapshot', querySnapshot)
+      querySnapshot.docChanges().forEach((change) => {
+        console.log(change)
+        if (change.type === "added") {
+          console.log("New city: ", change.doc.data());
+          if (change.doc.data().type == 'node') {
+            this.addNode({id: change.doc.id, ...change.doc.data()})
+          } else {
+            this.addLine({id: change.doc.id, ...change.doc.data()})
+          }
+        }
+        if (change.type === "modified") {
+          console.log("Modified city: ", change.doc.data());
+        }
+        if (change.type === "removed") {
+          console.log("Removed city: ", change.doc.data());
+          console.log($(`#${change.doc.id}`))
+          delete this.lineMap[change.doc.id]
+          $($(`#${change.doc.id}`)).remove()
+        }
+      });
+    });
   }
 }
 </script>
