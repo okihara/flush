@@ -1,21 +1,6 @@
 <template>
   <section type="section">
-<!--    <b-navbar type="is-white" style="padding: 4px;">-->
-<!--      <template slot="start">-->
-<!--        <b-navbar-item tag="router-link" :to="{ path: '/' }">-->
-<!--          Flush ver.0.10000000-->
-<!--        </b-navbar-item>-->
-<!--      </template>-->
-<!--    </b-navbar>-->
-
     <router-view></router-view>
-
-<!--    <div id="my-progress" class="modal is-active">-->
-<!--      <div class="modal-background"></div>-->
-<!--      <div class="modal-content" style="width:640px;">-->
-<!--        <progress class="progress is-large is-success" max="100">60%</progress>-->
-<!--      </div>-->
-<!--    </div>-->
   </section>
 </template>
 

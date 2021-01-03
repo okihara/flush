@@ -1,9 +1,9 @@
 <template>
   <div class="node">
-    <div class="node-text">{{ nodeText }}</div>
-    <div class="node-form" style="display: none;">
-      <textarea class="form-input" v-model="nodeText"></textarea>
-    </div>
+    <p class="node-text" contenteditable="true">{{ nodeText }}</p>
+    <!--    <div class="node-form" style="display: none; position: absolute; top: 0px; left:0px">-->
+    <!--      <textarea class="form-input" v-model="nodeText"></textarea>-->
+    <!--    </div>-->
   </div>
 </template>
 
@@ -15,12 +15,11 @@ export default {
   },
   data() {
     return {
-      isActive: true,
       nodeText: 'ノードアイテム'
     }
   },
   methods: {
-    centerPos: function() {
+    centerPos: function () {
       return {
         left: $(this.$el).position().left + $(this.$el).width() / 2,
         top: $(this.$el).position().top + $(this.$el).height() / 2
@@ -32,10 +31,16 @@ export default {
           drag: (event, ui) => {
             this.$emit('onMove')
           },
+          start: (event, ui) => {
+            console.log("start")
+          },
           stop: (event, ui) => {
+            console.log("stop")
             this.$emit('onMoveStop', this)
           },
-          stack: ".node"
+          stack: ".node",
+          revert: "valid",
+          revertDuration: 100
         }
     )
 
@@ -48,20 +53,17 @@ export default {
     )
 
     $(this.$el).on('dblclick', (t, args) => {
-      $(t.currentTarget).find('.node-text').hide()
-      $(t.currentTarget).find('.node-form').show()
-      $(t.currentTarget).find('.form-input').focus()
+      // $(t.currentTarget).find('.node-text').hide()
+      // $(t.currentTarget).find('.node-form').show()
+      // $(t.currentTarget).find('.node-text').attr('contenteditable', 'true')
+      $(t.currentTarget).find('.node-text').focus()
+
+      // $(t.currentTarget).find('.form-input').focus()
       t.stopPropagation();
     })
 
-    let node_form = $(this.$el).find('.node-form');
-    node_form.on('submit', t => {
-      $('.node').find('.node-text').show()
-      $('.node').find('.node-form').hide()
-    })
-    node_form.find('textarea').on('blur', t => {
-      $('.node').find('.node-text').show()
-      $('.node').find('.node-form').hide()
+    $(this.$el).find('.node-text').on('blur', t => {
+      this.nodeText = t.target.innerText
       this.$emit('onUpdateNode', this)
     })
   }
@@ -72,15 +74,13 @@ export default {
 .node {
   display: block;
   position: absolute;
-  left: 100px;
-  top: 300px;
   width: 10em;
-  /*height: 2em;*/
-
-  background: #039be5;
-  color: #ECEFF1;
   padding: 0.5em;
-  border: 3px solid #aaaaaa;
+  background: #f9f9f9;
+  color: #333333;
+  border: 2px solid #333333;
   border-radius: 5px;
+
+  box-shadow: 3px 3px 4px 0 rgba(0, 0, 0, .5);
 }
 </style>

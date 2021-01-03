@@ -1,8 +1,7 @@
 <template>
   <div id="root">
-    <svg x=0 y=0 width=1024 height=768 style="background-color: #ddd">
+    <svg x=0 y=0 width=1024 height=768 style="background-color: #f0f0f0">
     </svg>
-    <button @click="updateLines"></button>
   </div>
 </template>
 
@@ -61,8 +60,8 @@ export default {
       console.log("addline")
       const svg = $('svg')
       var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("stroke", "red")
-      line.setAttribute("stroke-width", "5")
+      line.setAttribute("stroke", "#333333")
+      line.setAttribute("stroke-width", "2")
       svg.append(line)
       $(line).attr("id", value.id)
 
@@ -107,6 +106,7 @@ export default {
           y: $(node.$el).css('top')
         }
       })
+      this.updateLines()
     },
     onDrop(src, target) {
       console.log(src, target)
@@ -194,3 +194,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+svg {
+  filter: drop-shadow(10px 10px 5px rgb(0, 0, 0));
+}
+</style>
